@@ -1,4 +1,5 @@
 # fuzzd
+**Note**: This is a work in progress. More features will be added over time.
 
 `fuzzd` is an AFL++ campaign orchestrator for prebuilt C/C++ fuzzing binaries.
 It supervises multi-instance fuzzing runs, keeps campaign output organized, and
@@ -115,7 +116,7 @@ cargo run -- cover \
   target_normal
 ```
 
-## Limitations
+## Limitations (for now)
 
 - AFL++ only.
 - Prebuilt C/C++ binaries only.
