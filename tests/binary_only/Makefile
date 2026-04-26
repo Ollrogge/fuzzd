@@ -28,14 +28,16 @@ $(TARGET)_normal: $(SRC)
 $(TARGET)_cmplog: $(SRC)
 	AFL_QUIET=1 AFL_LLVM_CMPLOG=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
 
+# VERBOSE keeps UBSAN diagnostics useful during crash replay instead of only trapping.
 $(TARGET)_asan_ubsan: $(SRC)
-	AFL_QUIET=1 AFL_USE_ASAN=1 AFL_USE_UBSAN=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
+	AFL_QUIET=1 AFL_USE_ASAN=1 AFL_USE_UBSAN=1 AFL_UBSAN_VERBOSE=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
 
 $(TARGET)_laf: $(SRC)
 	AFL_QUIET=1 AFL_LLVM_LAF_ALL=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
 
+# VERBOSE keeps CFISAN diagnostics useful during crash replay instead of only trapping.
 $(TARGET)_cfisan: $(SRC)
-	AFL_QUIET=1 AFL_USE_CFISAN=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
+	AFL_QUIET=1 AFL_USE_CFISAN=1 AFL_CFISAN_VERBOSE=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
 
 $(TARGET)_coverage: $(TARGET)_coverage_driver.o $(TARGET)_coverage_harness.o
 	$(COVERAGE_CC) $(COVERAGE_FLAGS) -o $@ $^
