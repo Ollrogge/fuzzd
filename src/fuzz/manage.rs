@@ -71,8 +71,8 @@ fn validate_args(args: &FuzzArgs) -> Result<()> {
         );
     }
 
-    reject_rust_fuzz_wrapper(&args.afl_fuzz, "--afl-fuzz")?;
-    reject_rust_fuzz_wrapper(&args.afl_whatsup, "--afl-whatsup")?;
+    reject_known_wrapper(&args.afl_fuzz, "--afl-fuzz")?;
+    reject_known_wrapper(&args.afl_whatsup, "--afl-whatsup")?;
 
     if let Some(dictionary) = &args.dict
         && !dictionary.is_file()
@@ -101,7 +101,7 @@ fn validate_args(args: &FuzzArgs) -> Result<()> {
     Ok(())
 }
 
-fn reject_rust_fuzz_wrapper(tool: &Path, option: &str) -> Result<()> {
+fn reject_known_wrapper(tool: &Path, option: &str) -> Result<()> {
     let file_name = tool
         .file_name()
         .unwrap_or_else(|| tool.as_os_str())
@@ -112,7 +112,7 @@ fn reject_rust_fuzz_wrapper(tool: &Path, option: &str) -> Result<()> {
         file_name.as_str(),
         "cargo" | "cargo-afl" | "cargo-hfuzz" | "cargo-fuzz"
     ) {
-        bail!("{option} must point directly to an AFL++ tool, not a Rust fuzzing wrapper");
+        bail!("{option} must point directly to an AFL++ tool");
     }
 
     Ok(())
@@ -175,8 +175,7 @@ fn seed_corpus_if_empty(corpus: &Path) -> Result<()> {
 struct BinaryVariants {
     normal: PathBuf,
     cmplog: Option<PathBuf>,
-    asan: Option<PathBuf>,
-    ubsan: Option<PathBuf>,
+    sanitizer: Option<PathBuf>,
     laf: Option<PathBuf>,
     cfisan: Option<PathBuf>,
 }
@@ -186,8 +185,7 @@ impl BinaryVariants {
         Self {
             normal: args.binary.clone(),
             cmplog: args.cmplog_binary.clone(),
-            asan: args.asan_binary.clone(),
-            ubsan: args.ubsan_binary.clone(),
+            sanitizer: args.sanitizer_binary.clone(),
             laf: args.laf_binary.clone(),
             cfisan: args.cfisan_binary.clone(),
         }
@@ -256,16 +254,11 @@ fn plan_afl_instances(variants: &BinaryVariants, jobs: usize) -> Vec<AflInstance
         remaining -= cmplog_count;
     }
 
-    let sanitizer_binary = variants
-        .asan
-        .as_ref()
-        .map(|binary| ("asan01", binary))
-        .or_else(|| variants.ubsan.as_ref().map(|binary| ("ubsan01", binary)));
     if remaining > 0
-        && let Some((name, binary)) = sanitizer_binary
+        && let Some(binary) = variants.sanitizer.as_ref()
     {
         instances.push(AflInstance {
-            name: name.to_string(),
+            name: "san01".to_string(),
             mode: AflMode::Secondary,
             binary: binary.clone(),
             cmplog_binary: None,
@@ -501,12 +494,8 @@ fn print_campaign_summary(
         display_optional_path(variants.cmplog.as_ref())
     );
     eprintln!(
-        "  asan binary: {}",
-        display_optional_path(variants.asan.as_ref())
-    );
-    eprintln!(
-        "  ubsan binary: {}",
-        display_optional_path(variants.ubsan.as_ref())
+        "  sanitizer binary: {}",
+        display_optional_path(variants.sanitizer.as_ref())
     );
     eprintln!(
         "  laf binary: {}",
@@ -1003,8 +992,7 @@ mod tests {
         BinaryVariants {
             normal: "target_normal".into(),
             cmplog: Some("target_cmplog".into()),
-            asan: Some("target_asan".into()),
-            ubsan: Some("target_ubsan".into()),
+            sanitizer: Some("target_asan_ubsan".into()),
             laf: Some("target_laf".into()),
             cfisan: Some("target_cfisan".into()),
         }
@@ -1046,11 +1034,11 @@ mod tests {
     }
 
     #[test]
-    fn plans_four_jobs_like_ziggy_binary_mode() {
+    fn plans_four_jobs_like_binary_mode() {
         let instances = plan_afl_instances(&variants(), 4);
         assert_eq!(
             names(&instances),
-            ["mainaflfuzzer", "cmplog00", "asan01", "sec00"]
+            ["mainaflfuzzer", "cmplog00", "san01", "sec00"]
         );
         assert_eq!(
             instances[1].cmplog_binary,
@@ -1068,7 +1056,7 @@ mod tests {
             [
                 "mainaflfuzzer",
                 "cmplog00",
-                "asan01",
+                "san01",
                 "laf01",
                 "cfisan01",
                 "sec00",
@@ -1090,7 +1078,7 @@ mod tests {
             [
                 ("target_normal".to_string(), 4),
                 ("target_cmplog (cmplog)".to_string(), 1),
-                ("target_asan".to_string(), 1),
+                ("target_asan_ubsan".to_string(), 1),
                 ("target_laf".to_string(), 1),
                 ("target_cfisan".to_string(), 1),
             ]
@@ -1105,7 +1093,7 @@ mod tests {
             [
                 ("target_normal".to_string(), 10),
                 ("target_cmplog (cmplog)".to_string(), 3),
-                ("target_asan".to_string(), 1),
+                ("target_asan_ubsan".to_string(), 1),
                 ("target_laf".to_string(), 1),
                 ("target_cfisan".to_string(), 1),
             ]

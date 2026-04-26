@@ -16,8 +16,7 @@ all: campaign coverage
 campaign: \
 	$(TARGET)_normal \
 	$(TARGET)_cmplog \
-	$(TARGET)_asan \
-	$(TARGET)_ubsan \
+	$(TARGET)_asan_ubsan \
 	$(TARGET)_laf \
 	$(TARGET)_cfisan
 
@@ -29,11 +28,8 @@ $(TARGET)_normal: $(SRC)
 $(TARGET)_cmplog: $(SRC)
 	AFL_QUIET=1 AFL_LLVM_CMPLOG=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
 
-$(TARGET)_asan: $(SRC)
+$(TARGET)_asan_ubsan: $(SRC)
 	AFL_QUIET=1 AFL_USE_ASAN=1 AFL_USE_UBSAN=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
-
-$(TARGET)_ubsan: $(SRC)
-	AFL_QUIET=1 AFL_USE_UBSAN=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
 
 $(TARGET)_laf: $(SRC)
 	AFL_QUIET=1 AFL_LLVM_LAF_ALL=1 $(AFL_CC) $(CFLAGS) $(FUZZER_FLAGS) -o $@ $<
@@ -54,8 +50,7 @@ clean:
 	rm -f \
 		$(TARGET)_normal \
 		$(TARGET)_cmplog \
-		$(TARGET)_asan \
-		$(TARGET)_ubsan \
+		$(TARGET)_asan_ubsan \
 		$(TARGET)_laf \
 		$(TARGET)_cfisan \
 		$(TARGET)_coverage \

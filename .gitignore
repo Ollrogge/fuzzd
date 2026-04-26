@@ -1,3 +1,9 @@
 /target
 **/output
+
 *.o
+*.profraw
+*.profdata
+
+/tests/binary_only/output/
+/tests/binary_only/target_*

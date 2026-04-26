@@ -25,13 +25,12 @@ make -C tests/binary_only
 This produces:
 
 ```text
-tests/binary_only/target_normal    # normal AFL++ binary
-tests/binary_only/target_cmplog    # AFL++ CmpLog binary
-tests/binary_only/target_asan      # ASAN/UBSAN binary
-tests/binary_only/target_ubsan     # UBSAN binary
-tests/binary_only/target_laf       # laf-intel binary
-tests/binary_only/target_cfisan    # CFISAN binary
-tests/binary_only/target_coverage  # LLVM coverage replay binary
+tests/binary_only/target_normal      # normal AFL++ binary
+tests/binary_only/target_cmplog      # AFL++ CmpLog binary
+tests/binary_only/target_asan_ubsan  # ASAN+UBSAN sanitizer binary
+tests/binary_only/target_laf         # laf-intel binary
+tests/binary_only/target_cfisan      # CFISAN binary
+tests/binary_only/target_coverage    # LLVM coverage replay binary
 ```
 
 Launch a campaign:
@@ -40,7 +39,7 @@ Launch a campaign:
 cargo run -- fuzz \
   --binary tests/binary_only/target_normal \
   --cmplog-binary tests/binary_only/target_cmplog \
-  --asan-binary tests/binary_only/target_asan \
+  --sanitizer-binary tests/binary_only/target_asan_ubsan \
   --laf-binary tests/binary_only/target_laf \
   --cfisan-binary tests/binary_only/target_cfisan \
   -j 8 \
@@ -80,7 +79,7 @@ output/target_normal/
   afl/
     mainaflfuzzer/
     cmplog00/
-    asan01/
+    san01/
     laf01/
     cfisan01/
     sec00/
@@ -98,7 +97,7 @@ Print the AFL++ launch plan without spawning anything:
 cargo run -- fuzz \
   --binary tests/binary_only/target_normal \
   --cmplog-binary tests/binary_only/target_cmplog \
-  --asan-binary tests/binary_only/target_asan \
+  --sanitizer-binary tests/binary_only/target_asan_ubsan \
   --laf-binary tests/binary_only/target_laf \
   --cfisan-binary tests/binary_only/target_cfisan \
   -j 8 \

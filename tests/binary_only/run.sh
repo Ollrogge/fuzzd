@@ -8,14 +8,14 @@ fi
 
 CORES="$1"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ZIGGY="${ZIGGY:-$DIR/../../target/debug/cargo-ziggy}"
+FUZZD="${FUZZD:-$DIR/../../target/debug/fuzzd}"
 
-exec "$ZIGGY" ziggy fuzz \
+exec "$FUZZD" fuzz \
     --binary "$DIR/target_normal" \
     --cmplog-binary "$DIR/target_cmplog" \
-    --asan-binary "$DIR/target_asan" \
-    --ubsan-binary "$DIR/target_ubsan" \
+    --sanitizer-binary "$DIR/target_asan_ubsan" \
     --laf-binary "$DIR/target_laf" \
     --cfisan-binary "$DIR/target_cfisan" \
-    --ziggy-output "$DIR/output" \
-    --jobs "$CORES"
+    --output-root "$DIR/output" \
+    --jobs "$CORES" \
+    -m none

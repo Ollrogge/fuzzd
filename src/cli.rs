@@ -17,7 +17,7 @@ pub const DEFAULT_LLVM_COV: &str = "llvm-cov";
     author,
     version,
     about = "AFL++ campaign orchestrator for prebuilt C/C++ fuzzing binaries",
-    long_about = "fuzzd orchestrates AFL++ campaigns for prebuilt C/C++ fuzzing binaries. It invokes AFL++ and LLVM tools directly; it does not build targets and does not route commands through cargo afl, cargo hfuzz, or Rust fuzzing wrappers."
+    long_about = "fuzzd orchestrates AFL++ campaigns for prebuilt C/C++ fuzzing binaries. It invokes AFL++ and LLVM tools directly and does not build targets."
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -43,13 +43,9 @@ pub struct FuzzArgs {
     #[arg(long = "cmplog-binary", value_name = "PATH", value_parser = existing_file)]
     pub cmplog_binary: Option<PathBuf>,
 
-    /// Optional ASAN binary.
-    #[arg(long = "asan-binary", value_name = "PATH", value_parser = existing_file)]
-    pub asan_binary: Option<PathBuf>,
-
-    /// Optional UBSAN binary, used only if ASAN is absent.
-    #[arg(long = "ubsan-binary", value_name = "PATH", value_parser = existing_file)]
-    pub ubsan_binary: Option<PathBuf>,
+    /// Optional ASAN+UBSAN sanitizer binary.
+    #[arg(long = "sanitizer-binary", value_name = "PATH", value_parser = existing_file)]
+    pub sanitizer_binary: Option<PathBuf>,
 
     /// Optional laf-intel binary.
     #[arg(long = "laf-binary", value_name = "PATH", value_parser = existing_file)]
